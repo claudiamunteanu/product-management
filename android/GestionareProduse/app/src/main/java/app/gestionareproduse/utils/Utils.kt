@@ -73,4 +73,16 @@ object Utils {
         return Product(values[0].toLong(), values[1], values[2], values[3].toDouble(),values[4].toBoolean(),
         Utils.stringToDate(values[5]),values[6].toBoolean(), values[7], values[8].toLong())
     }
+
+    fun millisecondsToStringDate(milliseconds : Long) : String{
+        return try{
+            val formatter = SimpleDateFormat("dd.MM.yyyy")
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = milliseconds
+            return formatter.format(calendar.time)
+        } catch (exception : Exception){
+            Log.d("error", "", exception)
+            ""
+        }
+    }
 }

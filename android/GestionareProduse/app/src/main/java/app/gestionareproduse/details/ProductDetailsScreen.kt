@@ -1,31 +1,27 @@
 package app.gestionareproduse.details
 
+import android.widget.CalendarView
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import app.gestionareproduse.details.viewmodel.ProductsDetailsViewModel
-import app.gestionareproduse.products.SingleProductItem
-import app.gestionareproduse.products.domain.Product
-import app.gestionareproduse.utils.ProductPriceType
+import app.gestionareproduse.utils.DatePickerview
 import app.gestionareproduse.utils.Utils
 import coil.compose.rememberImagePainter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import java.util.*
 
 @Composable
 fun ProductDetailsScreen(
@@ -38,52 +34,82 @@ fun ProductDetailsScreen(
     val name = remember{ mutableStateOf(selectedProduct.name)}
     val brand = remember{ mutableStateOf(selectedProduct.brand)}
     val price = remember{ mutableStateOf(selectedProduct.price.toString())}
-    val expirationDate = remember{ mutableStateOf(Utils.dateToUiString(selectedProduct.expirationDate))}
     val url = remember{ mutableStateOf(selectedProduct.image)}
 
+    var expirationDate = remember{ mutableStateOf(Utils.dateToUiString(selectedProduct.expirationDate))}
+    val updatedDate = {date : Long ->
+        expirationDate.value = Utils.millisecondsToStringDate(date)
+    }
 
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(50.dp, 20.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ){
         item {
-            OutlinedTextField(value = name.value, onValueChange = {
-                name.value = it
-            },
-                label = {
-                    Text(text = "Name")
-                }
-            )
-//            Text(
-//                text = "Required"
-//            )
+            Column(){
+                OutlinedTextField(
+                    value = name.value,
+                    onValueChange = {
+                        name.value = it
+                    },
+                    label = {
+                        Text(text = "Name")
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = "Required",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
         }
         item{
-            OutlinedTextField(value = brand.value, onValueChange = {
-                brand.value = it
-            },
-                label = {
-                    Text(text = "Brand")
-                }
-            )
-//            Text(
-//                text = "Required"
-//            )
+            Column(){
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = brand.value,
+                    onValueChange = {
+                        brand.value = it
+                    },
+                    label = {
+                        Text(text = "Brand")
+                    }
+                )
+                Text(
+                    text = "Required",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
         }
         item{
-            OutlinedTextField(value = price.value, onValueChange = {
-                price.value = it
-            },
-                label = {
-                    Text(text = "Price")
-                }
-            )
-//            Text(
-//                text = "Required"
-//            )
+            Column() {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = price.value,
+                    onValueChange = {
+                        price.value = it
+                    },
+                    label = {
+                        Text(text = "Price")
+                    }
+                )
+                Text(
+                    text = "Required",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
         }
         item{
-
-            Row(){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+            ){
                 RadioButton(selected = selectedType.value==true, onClick = {
                     selectedType.value = true
                 })
@@ -98,20 +124,23 @@ fun ProductDetailsScreen(
             }
         }
         item{
-            OutlinedTextField(value = expirationDate.value, onValueChange = {
-                expirationDate.value = it
-            },
-                label = {
-                    Text(text = "Expiration Date")
-                }
-            )
-//            Text(
-//                text = "Required"
-//            )
+            Column() {
+                DatePickerview( expirationDate.value, updatedDate )
+                Text(
+                    text = "Required",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
         }
         item{
-            Row(){
-                Checkbox(checked = isRefrigerated.value == true, onCheckedChange = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+            ){
+                Checkbox(
+                    checked = isRefrigerated.value == true,
+                    onCheckedChange = {
                     isRefrigerated.value = it
                 })
                 Spacer(modifier = Modifier.size(16.dp))
@@ -119,16 +148,24 @@ fun ProductDetailsScreen(
             }
         }
         item{
-            OutlinedTextField(value = url.value, onValueChange = {
-                url.value = it
-            },
-                label = {
-                    Text(text = "Image URL")
-                }
-            )
-//            Text(
-//                text = "Required"
-//            )
+            Column() {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = url.value,
+                    onValueChange = {
+                        url.value = it
+                    },
+                    label = {
+                        Text(text = "Image URL")
+                    }
+                )
+                Text(
+                    text = "Required",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
         }
         item{
             Image(
@@ -142,7 +179,10 @@ fun ProductDetailsScreen(
             )
         }
         item{
-            Row(){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ){
                 Button(
                     content = {
                         Text(text = "Cancel")

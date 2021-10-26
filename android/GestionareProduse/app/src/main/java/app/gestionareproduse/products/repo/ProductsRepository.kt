@@ -45,7 +45,7 @@ class ProductsRepositoryImpl @Inject constructor(
             price = 1.39,
             isPerUnit = false,
             expirationDate = Utils.stringToDate("29.11.2021"),
-            isRefrigerated = true,
+            isRefrigerated = false,
             image = "https://www.cora.ro/images/products/1793205/gallery/1793205_hd_1.jpg",
             warehouseId = 1L
         ),
