@@ -142,7 +142,7 @@ fun NewProductScreen(
             Row(){
                 Button(
                     content = {
-                        Text(text = "Renunta")
+                        Text(text = "Cancel")
                     },
                     onClick = {
                         controller.popBackStack()
@@ -150,7 +150,7 @@ fun NewProductScreen(
                 )
                 Button(
                     content = {
-                        Text(text = "Adauga")
+                        Text(text = "Save")
                     },
                     onClick = {
                         val selectedProduct = Product(

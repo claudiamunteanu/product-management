@@ -1,5 +1,6 @@
 package app.gestionareproduse.details
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -11,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -38,6 +40,7 @@ fun ProductDetailsScreen(
     val price = remember{ mutableStateOf(selectedProduct.price.toString())}
     val expirationDate = remember{ mutableStateOf(Utils.dateToUiString(selectedProduct.expirationDate))}
     val url = remember{ mutableStateOf(selectedProduct.image)}
+
 
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -142,7 +145,7 @@ fun ProductDetailsScreen(
             Row(){
                 Button(
                     content = {
-                        Text(text = "Renunta")
+                        Text(text = "Cancel")
                     },
                     onClick = {
                         controller.popBackStack()
@@ -150,7 +153,7 @@ fun ProductDetailsScreen(
                 )
                 Button(
                     content = {
-                        Text(text = "Modifica")
+                        Text(text = "Update")
                     },
                     onClick = {
                         selectedProduct.isPerUnit = selectedType.value
@@ -164,15 +167,52 @@ fun ProductDetailsScreen(
                         controller.popBackStack()
                     }
                 )
+                val openDialog = remember { mutableStateOf(false)  }
                 Button(
                     content = {
-                        Text(text = "Sterge")
+                        Text(text = "Delete")
                     },
                     onClick = {
-                        viewModel.deleteProduct(selectedProduct)
-                        controller.popBackStack()
+                        openDialog.value = true
                     }
                 )
+                if (openDialog.value) {
+                    val context = LocalContext.current
+                    AlertDialog(
+                        onDismissRequest = {
+                            // Dismiss the dialog when the user clicks outside the dialog or on the back
+                            // button. If you want to disable that functionality, simply use an empty
+                            // onCloseRequest.
+                            openDialog.value = false
+                        },
+                        title = {
+                            Text(text = "Do you wish to delete the product?")
+                        },
+                        dismissButton = {
+                            Button(
+                                onClick = {
+                                    openDialog.value = false
+                                }) {
+                                Text("No")
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    openDialog.value = false
+                                    viewModel.deleteProduct(selectedProduct)
+                                    Toast.makeText(
+                                        context,
+                                        "Product deleted successfully!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    controller.popBackStack()
+                                }) {
+                                Text("Yes")
+                            }
+                        }
+                    )
+                }
             }
         }
 

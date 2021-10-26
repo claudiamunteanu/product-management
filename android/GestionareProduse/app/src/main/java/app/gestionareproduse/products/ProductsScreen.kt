@@ -6,10 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
@@ -40,16 +37,24 @@ fun ProductsScreen(
     addProduct: () -> Unit
 ){
     val listOfProducts by remember { viewModel.listOfProducts }
-    LazyColumn{
-        items(listOfProducts){item->
-            SingleProductItem(
-                product = item,
-                onProductClick = onProductClick
-            )
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {addProduct()}) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+
+            }
         }
-    }
-    FloatingActionButton(onClick = {addProduct()}) {
-        Icon(imageVector = Icons.Filled.Add, contentDescription = null)
+    ) {
+        LazyColumn{
+            items(listOfProducts){item->
+                SingleProductItem(
+                    product = item,
+                    onProductClick = onProductClick
+                )
+            }
+        }
     }
 }
 
