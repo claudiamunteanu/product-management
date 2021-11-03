@@ -6,29 +6,43 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import app.gestionareproduse.R
 import app.gestionareproduse.details.viewmodel.ProductsDetailsViewModel
 import app.gestionareproduse.utils.DatePickerview
 import app.gestionareproduse.utils.Utils
 import coil.compose.rememberImagePainter
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun ProductDetailsScreen(
     viewModel: ProductsDetailsViewModel = hiltViewModel(),
-    controller: NavController
+    controller: NavController,
+    encodedProduct : String
 ){
-    var selectedProduct = Utils.stringToProduct(Utils.selectedProductString)
+    val productString = URLDecoder.decode(encodedProduct, StandardCharsets.UTF_8.toString())
+    var selectedProduct = Utils.stringToProduct(productString)
     val isRefrigerated = remember{ mutableStateOf(selectedProduct.isRefrigerated)}
     val selectedType = remember{ mutableStateOf(selectedProduct.isPerUnit)}
     val name = remember{ mutableStateOf(selectedProduct.name)}
@@ -41,6 +55,37 @@ fun ProductDetailsScreen(
         expirationDate.value = Utils.millisecondsToStringDate(date)
     }
 
+    val openDeleteDialog = remember { mutableStateOf(false)  }
+    val openUpdateDialog = remember { mutableStateOf(false)}
+    val changed = remember { mutableStateOf(false)}
+
+    val isErrorName = remember { mutableStateOf(false) }
+    val isErrorBrand = remember { mutableStateOf(false) }
+    val isErrorPrice = remember { mutableStateOf(false) }
+    val isErrorExpirationDate = remember { mutableStateOf(false) }
+
+    var nameErrorString = ""
+    var brandErrorString = ""
+    var priceErrorString = ""
+    var expirationDateErrorString = ""
+
+    var isEnabled = remember { mutableStateOf(true) }
+
+    fun isError(){
+        isEnabled.value = !isErrorName.value && !isErrorBrand.value && !isErrorPrice.value && !isErrorExpirationDate.value
+    }
+
+    viewModel.nameHasError.observe(LocalLifecycleOwner.current) {
+        nameErrorString = it }
+    viewModel.brandHasError.observe(LocalLifecycleOwner.current) {
+        brandErrorString = it }
+    viewModel.priceHasError.observe(LocalLifecycleOwner.current) {
+        priceErrorString = it   }
+    viewModel.expDateHasError.observe(LocalLifecycleOwner.current) {
+        expirationDateErrorString = it  }
+
+    val focusManager = LocalFocusManager.current
+
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(50.dp, 20.dp),
@@ -52,18 +97,29 @@ fun ProductDetailsScreen(
                     value = name.value,
                     onValueChange = {
                         name.value = it
+                        changed.value = true
+                        isErrorName.value = viewModel.validateName(name.value)
+                        isError()
                     },
                     label = {
                         Text(text = "Name")
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(onNext = {
+                        isErrorName.value = viewModel.validateName(name.value)
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }),
+                    trailingIcon = {
+                        if (isErrorName.value) {
+                            Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
+                        }
+                    }
                 )
-                Text(
-                    text = "Required",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
+                assistiveOrErrorText(isError = isErrorName.value, errorString = nameErrorString)
             }
         }
         item{
@@ -73,17 +129,28 @@ fun ProductDetailsScreen(
                     value = brand.value,
                     onValueChange = {
                         brand.value = it
+                        changed.value = true
+                        isErrorBrand.value = viewModel.validateBrand(brand.value)
+                        isError()
                     },
                     label = {
                         Text(text = "Brand")
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(onNext = {
+                        isErrorBrand.value = viewModel.validateBrand(brand.value)
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }),
+                    trailingIcon = {
+                        if (isErrorBrand.value) {
+                            Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
+                        }
                     }
                 )
-                Text(
-                    text = "Required",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
+                assistiveOrErrorText(isError = isErrorBrand.value, errorString = brandErrorString)
             }
         }
         item{
@@ -93,17 +160,28 @@ fun ProductDetailsScreen(
                     value = price.value,
                     onValueChange = {
                         price.value = it
+                        changed.value = true
+                        isErrorPrice.value = viewModel.validatePrice(price.value)
+                        isError()
                     },
                     label = {
                         Text(text = "Price")
+                    },
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(onNext = {
+                        isErrorPrice.value = viewModel.validatePrice(price.value)
+                        focusManager.moveFocus(FocusDirection.Down)
+                    }),
+                    trailingIcon = {
+                        if (isErrorPrice.value) {
+                            Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
+                        }
                     }
                 )
-                Text(
-                    text = "Required",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
+                assistiveOrErrorText(isError = isErrorPrice.value, errorString = priceErrorString)
             }
         }
         item{
@@ -112,12 +190,14 @@ fun ProductDetailsScreen(
             ){
                 RadioButton(selected = selectedType.value==true, onClick = {
                     selectedType.value = true
+                    changed.value = true
                 })
                 Spacer(modifier = Modifier.size(16.dp))
                 Text("per unit")
                 Spacer(modifier = Modifier.size(16.dp))
                 RadioButton(selected = selectedType.value==false, onClick = {
                     selectedType.value = false
+                    changed.value = true
                 })
                 Spacer(modifier = Modifier.size(16.dp))
                 Text("per Kg")
@@ -125,12 +205,11 @@ fun ProductDetailsScreen(
         }
         item{
             Column() {
-                DatePickerview( expirationDate.value, updatedDate )
-                Text(
-                    text = "Required",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(start = 16.dp)
+                DatePickerview(expirationDate.value, updatedDate, changed, isErrorExpirationDate,
+                    { isError() })
+                assistiveOrErrorText(
+                    isError = isErrorExpirationDate.value,
+                    errorString = expirationDateErrorString
                 )
             }
         }
@@ -141,10 +220,11 @@ fun ProductDetailsScreen(
                 Checkbox(
                     checked = isRefrigerated.value == true,
                     onCheckedChange = {
-                    isRefrigerated.value = it
+                        isRefrigerated.value = it
+                        changed.value = true
                 })
                 Spacer(modifier = Modifier.size(16.dp))
-                Text("is refrigerated")
+                Text("is refrigerable")
             }
         }
         item{
@@ -154,16 +234,19 @@ fun ProductDetailsScreen(
                     value = url.value,
                     onValueChange = {
                         url.value = it
+                        changed.value = true
                     },
                     label = {
                         Text(text = "Image URL")
-                    }
-                )
-                Text(
-                    text = "Required",
-                    color = Color.Gray,
-                    style = MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(start = 16.dp)
+                    },
+                    maxLines = 1,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(onDone = {
+                        focusManager.clearFocus()
+                    }),
                 )
             }
         }
@@ -173,7 +256,11 @@ fun ProductDetailsScreen(
                     .size(200.dp)
                     .padding(8.dp),
                 painter = rememberImagePainter(
-                    selectedProduct.image
+                    if (url.value.isNotEmpty()) {
+                        url.value
+                    } else {
+                        R.drawable.placeholder_image
+                    }
                 ),
                 contentDescription = null
             )
@@ -188,50 +275,27 @@ fun ProductDetailsScreen(
                         Text(text = "Cancel")
                     },
                     onClick = {
-                        controller.popBackStack()
+                        if (!changed.value || !isEnabled.value)
+                            controller.popBackStack()
+                        else
+                            openUpdateDialog.value = true
                     }
                 )
-                Button(
-                    content = {
-                        Text(text = "Update")
-                    },
-                    onClick = {
-                        selectedProduct.isPerUnit = selectedType.value
-                        selectedProduct.isRefrigerated = isRefrigerated.value
-                        selectedProduct.name = name.value
-                        selectedProduct.brand= brand.value
-                        selectedProduct.price = price.value.toDouble()
-                        selectedProduct.expirationDate = Utils.stringToDate(expirationDate.value)
-                        selectedProduct.image = url.value
-                        viewModel.updateProduct(selectedProduct)
-                        controller.popBackStack()
-                    }
-                )
-                val openDialog = remember { mutableStateOf(false)  }
-                Button(
-                    content = {
-                        Text(text = "Delete")
-                    },
-                    onClick = {
-                        openDialog.value = true
-                    }
-                )
-                if (openDialog.value) {
+                if(openUpdateDialog.value && changed.value){
                     val context = LocalContext.current
                     AlertDialog(
                         onDismissRequest = {
-                            // Dismiss the dialog when the user clicks outside the dialog or on the back
-                            // button. If you want to disable that functionality, simply use an empty
-                            // onCloseRequest.
-                            openDialog.value = false
+                            openUpdateDialog.value = false
                         },
                         title = {
-                            Text(text = "Do you wish to delete the product?")
+                            Text(text = "Do you wish to save the modifications?")
                         },
                         dismissButton = {
                             Button(
                                 onClick = {
-                                    openDialog.value = false
+                                    openUpdateDialog.value = false
+                                    changed.value = false
+                                    controller.popBackStack()
                                 }) {
                                 Text("No")
                             }
@@ -239,7 +303,86 @@ fun ProductDetailsScreen(
                         confirmButton = {
                             Button(
                                 onClick = {
-                                    openDialog.value = false
+                                    openUpdateDialog.value = false
+                                    selectedProduct.isPerUnit = selectedType.value
+                                    selectedProduct.isRefrigerated = isRefrigerated.value
+                                    selectedProduct.name = name.value
+                                    selectedProduct.brand= brand.value
+                                    selectedProduct.price = price.value.toDouble()
+                                    selectedProduct.expirationDate = Utils.stringToDate(expirationDate.value)
+                                    selectedProduct.image = url.value
+                                    viewModel.updateProduct(selectedProduct)
+                                    Toast.makeText(
+                                        context,
+                                        "Product updated successfully!",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                    controller.popBackStack()
+                                }) {
+                                Text("Yes")
+                            }
+                        }
+                    )
+                }
+                val context = LocalContext.current
+                Button(
+                    enabled = isEnabled.value,
+                    content = {
+                        Text(text = "Update")
+                    },
+                    onClick = {
+                        isErrorName.value = viewModel.validateName(name.value)
+                        isErrorBrand.value = viewModel.validateBrand(brand.value)
+                        isErrorPrice.value = viewModel.validatePrice(price.value)
+                        isErrorExpirationDate.value = viewModel.validateExpirationDate(expirationDate.value)
+                        isError()
+                        if(isEnabled.value){
+                            selectedProduct.isPerUnit = selectedType.value
+                            selectedProduct.isRefrigerated = isRefrigerated.value
+                            selectedProduct.name = name.value
+                            selectedProduct.brand= brand.value
+                            selectedProduct.price = price.value.toDouble()
+                            selectedProduct.expirationDate = Utils.stringToDate(expirationDate.value)
+                            selectedProduct.image = url.value
+                            viewModel.updateProduct(selectedProduct)
+                            Toast.makeText(
+                                context,
+                                "Product updated successfully!",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            controller.popBackStack()
+                        }
+                    }
+                )
+                Button(
+                    content = {
+                        Text(text = "Delete")
+                    },
+                    onClick = {
+                        openDeleteDialog.value = true
+                    }
+                )
+                if (openDeleteDialog.value) {
+                    val context = LocalContext.current
+                    AlertDialog(
+                        onDismissRequest = {
+                            openDeleteDialog.value = false
+                        },
+                        title = {
+                            Text(text = "Do you wish to delete the product?")
+                        },
+                        dismissButton = {
+                            Button(
+                                onClick = {
+                                    openDeleteDialog.value = false
+                                }) {
+                                Text("No")
+                            }
+                        },
+                        confirmButton = {
+                            Button(
+                                onClick = {
+                                    openDeleteDialog.value = false
                                     viewModel.deleteProduct(selectedProduct)
                                     Toast.makeText(
                                         context,

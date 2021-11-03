@@ -15,6 +15,8 @@ import app.gestionareproduse.products.domain.Product
 import app.gestionareproduse.utils.Utils
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun ProductNavigation(){
@@ -27,21 +29,25 @@ fun ProductNavigation(){
             ProductsScreen(
                 onProductClick = { selectedProduct ->
                     val productString = Utils.productToString(selectedProduct)
-                    Utils.selectedProductString = productString
-                    navController.navigate("${ProductDetails.route}")
+                    val encodedProduct = URLEncoder.encode(productString, StandardCharsets.UTF_8.toString())
+                    navController.navigate("${ProductDetails.route}/$encodedProduct")
                 },
                 addProduct = {
-                    navController.navigate("${NewProduct.route}")
+                    navController.navigate(NewProduct.route)
                 }
             )
         }
         composable(
-            route = "${ProductDetails.route}",
+            route = "${ProductDetails.route}/{encodedProduct}",
+            arguments = listOf(navArgument("encodedProduct"){type = NavType.StringType})
         ) { navBackStackEntry ->
-                ProductDetailsScreen(controller = navController)
+            navBackStackEntry.arguments?.getString("encodedProduct")?.let{
+                encodedProduct->
+                ProductDetailsScreen(controller = navController, encodedProduct = encodedProduct)
+            }
         }
         composable(
-            route = "${NewProduct.route}",
+            route = NewProduct.route,
         ) { navBackStackEntry ->
             NewProductScreen(controller = navController)
         }

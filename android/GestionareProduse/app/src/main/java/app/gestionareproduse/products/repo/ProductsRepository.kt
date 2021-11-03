@@ -9,6 +9,7 @@ interface ProductsRepository{
     fun updateProduct(product: Product)
     fun deleteProduct(product: Product)
     fun saveProduct(product: Product)
+    fun getSize() : Int
 }
 
 class ProductsRepositoryImpl @Inject constructor(
@@ -80,6 +81,10 @@ class ProductsRepositoryImpl @Inject constructor(
 
     override fun saveProduct(product: Product) {
         productList.add(product)
+    }
+
+    override fun getSize(): Int {
+        return productList.size;
     }
 
 }

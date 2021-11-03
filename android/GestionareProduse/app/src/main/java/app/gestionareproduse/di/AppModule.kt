@@ -2,12 +2,10 @@ package app.gestionareproduse.di
 
 import app.gestionareproduse.products.repo.ProductsRepository
 import app.gestionareproduse.products.repo.ProductsRepositoryImpl
-import app.gestionareproduse.products.service.ProductsService
-import app.gestionareproduse.products.usecase.GetProductsUseCase
-import app.gestionareproduse.products.usecase.GetProductsUseCaseImpl
+import app.gestionareproduse.products.usecase.ProductsUseCase
+import app.gestionareproduse.products.usecase.ProductsUseCaseImpl
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -26,7 +24,7 @@ class AppModule {
 
         @Binds
         @Singleton
-        fun provideGetProductsUseCase(uc: GetProductsUseCaseImpl): GetProductsUseCase
+        fun provideProductsUseCase(uc: ProductsUseCaseImpl): ProductsUseCase
 
     }
 

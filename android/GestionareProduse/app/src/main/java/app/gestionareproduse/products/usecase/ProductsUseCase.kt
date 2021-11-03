@@ -4,16 +4,17 @@ import app.gestionareproduse.products.domain.Product
 import app.gestionareproduse.products.repo.ProductsRepository
 import javax.inject.Inject
 
-interface GetProductsUseCase{
+interface ProductsUseCase{
     suspend operator fun invoke(): List<Product>
     fun updateProduct(product: Product)
     fun deleteProduct(product: Product)
     fun saveProduct(product: Product)
+    fun getSize() : Int
 }
 
-class GetProductsUseCaseImpl @Inject constructor(
+class ProductsUseCaseImpl @Inject constructor(
     val repo: ProductsRepository
-) : GetProductsUseCase{
+) : ProductsUseCase{
     override suspend fun invoke(): List<Product> {
         return repo.getAllProducts()
     }
@@ -28,5 +29,9 @@ class GetProductsUseCaseImpl @Inject constructor(
 
     override fun saveProduct(product: Product) {
         repo.saveProduct(product)
+    }
+
+    override fun getSize(): Int {
+        return repo.getSize()
     }
 }

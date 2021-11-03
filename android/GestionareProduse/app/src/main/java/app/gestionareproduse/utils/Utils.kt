@@ -10,8 +10,6 @@ import java.time.LocalDateTime
 import java.util.*
 
 object Utils {
-
-    var selectedProductString = ""
     fun dateToUiString(
         date: Date
     ) : String{
