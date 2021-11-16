@@ -105,11 +105,20 @@ class _ProductDetailsState extends State<ProductDetails> {
                     isRefrigerated: _isRefrigerated,
                     image: _imageController.value.text,
                     warehouseId: _warehouseId);
-                _viewModel.deleteProduct(product);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Product deleted successfully!')),
-                );
+                Product? returnProduct = _viewModel.deleteProduct(product);
+                if(returnProduct!=null){
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Product deleted successfully!')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'There was a problem in deleting the product!')),
+                  );
+                }
                 Navigator.pop(context);
                 Navigator.pop(context);
               },
@@ -299,12 +308,20 @@ class _ProductDetailsState extends State<ProductDetails> {
                                         isRefrigerated: _isRefrigerated,
                                         image: _imageController.value.text,
                                         warehouseId: _warehouseId);
-                                    _viewModel.updateProduct(product);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              'Product updated successfully!')),
-                                    );
+                                    Product? returnProduct = _viewModel.updateProduct(product);
+                                    if(returnProduct!=null){
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Product updated successfully!')),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'There was a problem in updating the product!')),
+                                      );
+                                    }
                                     Navigator.pop(context);
                                   }
                                 },

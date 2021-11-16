@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -10,8 +11,9 @@ class NewProductViewModel{
 
   NewProductViewModel(this._repo);
 
-  void saveProduct(Product product) {
-    _repo.saveProduct(product);
+  Product? saveProduct(Product product) {
+    Product? savedProduct = _repo.saveProduct(product);
+    return savedProduct;
   }
 
   String? validateName(String? name){

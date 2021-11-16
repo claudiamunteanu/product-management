@@ -7,6 +7,7 @@ import 'package:gestionare_produse/repository/products_repository.dart';
 import 'package:gestionare_produse/utils/utils.dart';
 import 'package:gestionare_produse/view_models/new_product_view_model.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:provider/provider.dart';
 
 class NewProduct extends StatefulWidget {
   ProductRepository _repo;
@@ -221,7 +222,7 @@ class _NewProductState extends State<NewProduct> {
                                 child: const Text('Cancel'),
                               ),
                               ElevatedButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   // Validate returns true if the form is valid, or false otherwise.
                                   if (_formKey.currentState!.validate()) {
                                     Product product = Product (
@@ -235,11 +236,21 @@ class _NewProductState extends State<NewProduct> {
                                       image: _imageController.value.text,
                                       warehouseId: 1
                                     );
-                                    _viewModel.saveProduct(product);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('Processing Data')),
-                                    );
+                                    Product? returnProduct = await Provider.of<NewProductViewModel>(context, listen: false)
+                                    .saveProduct(product);
+                                    if(returnProduct==null){
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Product added successfully!')),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'There was a problem in adding the product')),
+                                      );
+                                    }
                                     Navigator.pop(context);
                                   }
                                 },

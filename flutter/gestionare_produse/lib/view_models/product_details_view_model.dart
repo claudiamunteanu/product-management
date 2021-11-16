@@ -7,12 +7,12 @@ class ProductDetailsViewModel{
 
   ProductDetailsViewModel(this._repo);
 
-  void updateProduct(Product product) {
-    _repo.updateProduct(product);
+  Product? updateProduct(Product product) {
+    return _repo.updateProduct(product);
   }
 
-  void deleteProduct(Product product) {
-    _repo.deleteProduct(product);
+  Product? deleteProduct(Product product) {
+    return _repo.deleteProduct(product);
   }
 
   String? validateName(String? name){

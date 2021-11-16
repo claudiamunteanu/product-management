@@ -1,8 +1,11 @@
+import 'dart:collection';
+
+import 'package:flutter/cupertino.dart';
 import 'package:gestionare_produse/domain/product.dart';
 import 'package:gestionare_produse/utils/utils.dart';
 
 class ProductRepository{
-  List<Product> products = [
+  final List<Product> _products = [
     Product(
         id: 1,
         name: "Iaurt cu cereale, nuci si ovaz",
@@ -20,7 +23,7 @@ class ProductRepository{
         brand: "Tuc",
         price: 2.55,
         isPerUnit: true,
-        expirationDate: stringToDate("08.11.2021"),
+        expirationDate: stringToDate("14.11.2021"),
         isRefrigerated: false,
         image:
         "https://www.auchan.ro/public/images/h01/hb2/h00/biscuiti-tuc-originali-100-g-8861037395998.jpg",
@@ -48,27 +51,31 @@ class ProductRepository{
         "https://www.auchan.ro/public/images/hb0/h48/h00/inghetata-topgun-over-cu-vanilie-260ml-9434379255838.jpg",
         warehouseId: 1)
   ];
-  
+
   List<Product> getAllProducts(){
-    return products;
+    return _products;
   }
   
-  void saveProduct(Product product){
-    products.add(product);
+  Product? saveProduct(Product product){
+    _products.add(product);
+    return null;
   }
   
-  void updateProduct(Product product){
-    Product oldProduct = products.firstWhere((pr) => pr.id == product.id);
-    products.remove(oldProduct);
-    products.add(product);
+  Product? updateProduct(Product product){
+    Product oldProduct = _products.firstWhere((pr) => pr.id == product.id);
+    _products.remove(oldProduct);
+    _products.add(product);
+    return oldProduct;
   }
 
-  void deleteProduct(Product product){
-    Product oldProduct = products.firstWhere((pr) => pr.id == product.id);
-    products.remove(oldProduct);
+  Product? deleteProduct(Product product){
+    Product oldProduct = _products.firstWhere((pr) => pr.id == product.id);
+    _products.remove(oldProduct);
+    return oldProduct;
   }
 
   int getSize(){
+    var products;
     return products.length;
   }
 }
