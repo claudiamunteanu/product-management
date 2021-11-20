@@ -1,10 +1,14 @@
-package app.gestionareproduse.details.viewmodel
+package app.gestionareproduse.detailsScreen.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import app.gestionareproduse.products.domain.Product
 import app.gestionareproduse.products.usecase.ProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.lang.NumberFormatException
 import javax.inject.Inject
 
@@ -17,12 +21,28 @@ class ProductsDetailsViewModel @Inject constructor(
     val priceHasError = MutableLiveData<String>()
     val expDateHasError = MutableLiveData<String>()
 
-    fun updateProduct(product: Product) {
-        useCase.updateProduct(product)
+    val isUpdatedSuccessfully = MutableLiveData<Boolean>()
+    val isDeletedSuccessfully = MutableLiveData<Boolean>()
+
+    fun updateProduct(product: Product) = viewModelScope.launch(Dispatchers.IO) {
+        try{
+            useCase.updateProduct(product)
+            isUpdatedSuccessfully.postValue(true)
+        } catch (exception : Exception){
+            isUpdatedSuccessfully.postValue(false)
+            Log.d("error", "", exception)
+        }
     }
 
-    fun deleteProduct(product: Product) {
-        useCase.deleteProduct(product)
+    fun deleteProduct(productId: Long) = viewModelScope.launch(Dispatchers.IO) {
+        try{
+            useCase.deleteProduct(productId)
+            isDeletedSuccessfully.postValue(true)
+        } catch (exception : Exception){
+            isDeletedSuccessfully.postValue(false)
+            Log.d("error", "", exception)
+        }
+
     }
 
     fun validateName(name: String): Boolean {

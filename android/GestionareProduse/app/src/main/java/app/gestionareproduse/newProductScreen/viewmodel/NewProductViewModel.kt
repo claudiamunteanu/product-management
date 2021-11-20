@@ -1,12 +1,14 @@
-package app.gestionareproduse.newProduct.ViewModel
+package app.gestionareproduse.newProductScreen.viewmodel
 
-import androidx.compose.foundation.lazy.rememberLazyListState
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import app.gestionareproduse.products.domain.Product
 import app.gestionareproduse.products.usecase.ProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.lang.NumberFormatException
 import javax.inject.Inject
@@ -15,67 +17,71 @@ import javax.inject.Inject
 class NewProductViewModel @Inject constructor(
     private val useCase: ProductsUseCase
 ) : ViewModel() {
-    val nameHasError = MutableLiveData<String>()
-    val brandHasError = MutableLiveData<String>()
-    val priceHasError = MutableLiveData<String>()
-    val expDateHasError = MutableLiveData<String>()
+    val nameError = MutableLiveData<String>()
+    val brandError = MutableLiveData<String>()
+    val priceError = MutableLiveData<String>()
+    val expDateError = MutableLiveData<String>()
 
-    fun saveProduct(product: Product) {
-        useCase.saveProduct(product)
+    val isSavedSuccessfully = MutableLiveData<Boolean>()
+
+    fun saveProduct(product: Product) = viewModelScope.launch(Dispatchers.IO) {
+        try{
+            useCase.saveProduct(product)
+            isSavedSuccessfully.postValue(true)
+        } catch (exception : Exception){
+            isSavedSuccessfully.postValue(false)
+            Log.d("error", "", exception)
+        }
     }
 
 
     fun validateName(name: String): Boolean {
         if (name.isEmpty()) {
-            nameHasError.value = "Name is required"
+            nameError.value = "Name is required"
             return true
         }
         if (name.length > 70) {
-            nameHasError.value = "Name must not exceed 70 characters"
+            nameError.value = "Name must not exceed 70 characters"
             return true
         }
-        nameHasError.value = ""
+        nameError.value = ""
         return false
     }
 
     fun validateBrand(brand: String): Boolean {
         if (brand.isEmpty()) {
-            brandHasError.value = "Brand is required"
+            brandError.value = "Brand is required"
             return true
         }
         if (brand.length > 30) {
-            brandHasError.value = "Brand must not exceed 30 characters"
+            brandError.value = "Brand must not exceed 30 characters"
             return true
         }
-        brandHasError.value = ""
+        brandError.value = ""
         return false
     }
 
     fun validatePrice(price: String): Boolean {
         if (price.isEmpty()) {
-            priceHasError.value = "Price is required"
+            priceError.value = "Price is required"
             return true
         }
         try {
             val priceDouble = price.toDouble()
         } catch (exception: NumberFormatException) {
-            priceHasError.value = "You must enter a valid price"
+            priceError.value = "You must enter a valid price"
             return true
         }
-        priceHasError.value = ""
+        priceError.value = ""
         return false
     }
 
     fun validateExpirationDate(expDate: String): Boolean {
         if (expDate.isEmpty()) {
-            expDateHasError.value = "Expiration date is required"
+            expDateError.value = "Expiration date is required"
             return true
         }
-        expDateHasError.value = ""
+        expDateError.value = ""
         return false
-    }
-
-    fun getSize() : Int {
-        return useCase.getSize()
     }
 }

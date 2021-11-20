@@ -3,7 +3,7 @@
     package="app.gestionareproduse">
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -14,7 +14,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.GestionareProduse.NoActionBar">
+            android:theme="@style/Theme.GestionareProduse">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

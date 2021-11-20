@@ -1,90 +1,50 @@
 package app.gestionareproduse.products.repo
 
+import androidx.annotation.WorkerThread
 import app.gestionareproduse.products.domain.Product
-import app.gestionareproduse.utils.Utils
-import javax.inject.Inject
+import app.gestionareproduse.products.domain.SortField
+import kotlinx.coroutines.flow.Flow
 
 interface ProductsRepository{
-    suspend fun getAllProducts(): List<Product>
-    fun updateProduct(product: Product)
-    fun deleteProduct(product: Product)
-    fun saveProduct(product: Product)
-    fun getSize() : Int
+    fun getAllProducts(field: SortField, warehouseId: Long): Flow<List<Product>>
+    suspend fun updateProduct(product: Product)
+    suspend fun deleteProduct(productId: Long)
+    suspend fun saveProduct(product: Product)
 }
 
-class ProductsRepositoryImpl @Inject constructor(
-//    val service: ProductsService
+class ProductsRepositoryImpl(
+    private val productDao: ProductDao
 ) : ProductsRepository{
 
-    val productList = arrayListOf(
-        Product(
-            id = 1L,
-            name = "Iaurt cu cereale, nuci si ovaz",
-            brand = "Activia",
-            price = 1.80,
-            isPerUnit = true,
-            expirationDate = Utils.stringToDate("16.10.2021"),
-            isRefrigerated = true,
-            image = "https://www.auchan.ro/public/images/h33/hd1/h00/iaurt-activia-cu-cereale-nuci-si-ovaz-125g-8950867689502.jpg",
-            warehouseId = 1L
-        ),
-        Product(
-            id = 2L,
-            name = "Biscuiti sarati, originali",
-            brand = "Tuc",
-            price = 2.55,
-            isPerUnit = true,
-            expirationDate = Utils.stringToDate("1.11.2021"),
-            isRefrigerated = false,
-            image = "https://www.auchan.ro/public/images/h01/hb2/h00/biscuiti-tuc-originali-100-g-8861037395998.jpg",
-            warehouseId = 1L
-        ),
-        Product(
-            id = 3L,
-            name = "Ceapa galbena",
-            brand = "Ceapa",
-            price = 1.39,
-            isPerUnit = false,
-            expirationDate = Utils.stringToDate("29.11.2021"),
-            isRefrigerated = false,
-            image = "https://www.cora.ro/images/products/1793205/gallery/1793205_hd_1.jpg",
-            warehouseId = 1L
-        ),
-        Product(
-            id = 4L,
-            name = "Inghetata Topgun Over cu vanilie,260ml",
-            brand = "Nestle",
-            price = 5.15,
-            isPerUnit = true,
-            expirationDate = Utils.stringToDate("31.12.2021"),
-            isRefrigerated = true,
-            image = "https://www.auchan.ro/public/images/hb0/h48/h00/inghetata-topgun-over-cu-vanilie-260ml-9434379255838.jpg",
-            warehouseId = 1L
-        )
-    )
-
-    override suspend fun getAllProducts(): List<Product> {
-//        return service.getAllProducts();
-        return productList
+    override fun getAllProducts(field: SortField, warehouseId: Long):Flow<List<Product>>{
+        return when (field){
+            SortField.EXP_DATE -> productDao.getAllProductsByExpDate(warehouseId)
+            SortField.NAME -> productDao.getAllProductsByName(warehouseId)
+            SortField.BRAND -> productDao.getAllProductsByBrand(warehouseId)
+            SortField.PRICE -> productDao.getAllProductsByPrice(warehouseId)
+        }
     }
 
-    override fun updateProduct(product: Product) {
-        val oldProduct = productList.find { it.id == product.id }
-        productList.remove(oldProduct)
-        productList.add(product)
+    // You must call this on a non-UI thread or your app will crash. So we're making this a
+    // suspend function so the caller methods know this.
+    // Like this, Room ensures that you're not doing any long running operations on the main
+    // thread, blocking the UI.
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    override suspend fun saveProduct(product: Product){
+        productDao.insert(product)
     }
 
-    override fun deleteProduct(product: Product) {
-        val oldProduct = productList.find { it.id == product.id }
-        productList.remove(oldProduct)
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    override suspend fun updateProduct(product: Product) {
+        productDao.update(product)
     }
 
-    override fun saveProduct(product: Product) {
-        productList.add(product)
-    }
-
-    override fun getSize(): Int {
-        return productList.size;
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    override suspend fun deleteProduct(productId: Long) {
+        productDao.delete(productId)
     }
 
 }

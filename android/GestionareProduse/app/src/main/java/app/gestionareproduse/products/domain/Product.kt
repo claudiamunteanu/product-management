@@ -1,11 +1,22 @@
 package app.gestionareproduse.products.domain
 
-import com.squareup.moshi.JsonClass
-import java.text.SimpleDateFormat
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
+import app.gestionareproduse.chooseWarehouseScreen.domain.Warehouse
+import app.gestionareproduse.utils.DateConverter
 import java.util.*
 
+@Entity(tableName = "products_table",
+        foreignKeys = arrayOf(ForeignKey(entity = Warehouse::class,
+                            parentColumns = arrayOf("id"),
+                            childColumns = arrayOf("warehouseId"),
+                            onDelete = ForeignKey.CASCADE,
+                            onUpdate = ForeignKey.CASCADE)))
+@TypeConverters(DateConverter::class)
 data class Product(
-    var id: Long,
+    @PrimaryKey(autoGenerate = true) var id: Long? = null,
     var name: String,
     var brand: String,
     var price: Double,

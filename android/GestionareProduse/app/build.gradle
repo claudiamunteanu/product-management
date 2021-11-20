@@ -49,6 +49,10 @@ android {
     }
 }
 
+ext{
+    room_version = '2.3.0'
+}
+
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.6.0'
@@ -84,4 +88,20 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.0-rc01'
 
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
+
+    // Room components
+    implementation "androidx.room:room-runtime:$rootProject.room_version"
+    kapt "androidx.room:room-compiler:$rootProject.room_version"
+    implementation "androidx.room:room-ktx:$rootProject.room_version"
+
+    //ViewModel
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycle_version"
+    //LiveData
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycle_version"
+    //Lifecycles only (without ViewModel or LiveData)
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$rootProject.lifecycle_version"
+    //Annotation processor
+    kapt "androidx.lifecycle:lifecycle-compiler:$rootProject.lifecycle_version"
+
+    implementation 'androidx.compose.runtime:runtime-livedata:1.0.5'
 }

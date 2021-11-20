@@ -1,6 +1,5 @@
 package app.gestionareproduse.utils
 
-import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -14,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.*
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -49,7 +47,7 @@ fun DatePickerview(
             val (label, errorView, iconView) = createRefs()
 
             Text(
-                text = datePicked,
+                text = if (datePicked.isEmpty()) "Pick a date" else datePicked,
                 color = MaterialTheme.colors.onSurface,
                 modifier = Modifier
                     .fillMaxWidth()
