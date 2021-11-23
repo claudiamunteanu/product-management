@@ -41,6 +41,8 @@ import app.gestionareproduse.products.domain.getSortField
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
+internal var shouldGetListFromDatabase = true
+
 @Composable
 fun ProductsScreen(
     viewModel: ProductsViewModel = hiltViewModel(),
@@ -57,7 +59,10 @@ fun ProductsScreen(
 
     val warehouseString = URLDecoder.decode(encodedWarehouse, StandardCharsets.UTF_8.toString())
     val warehouse = Utils.stringToWarehouse(warehouseString)
-    selectedField.value?.let { warehouse.id?.let { it1 -> viewModel.getAllProducts(it, it1) } }
+    if (shouldGetListFromDatabase) {
+        selectedField.value?.let { warehouse.id?.let { it1 -> viewModel.getAllProducts(it, it1) } }
+        shouldGetListFromDatabase = false
+    }
 
     viewModel.isRetrievedSuccessfully.observe(LocalLifecycleOwner.current){
         if(it == false){
@@ -66,6 +71,8 @@ fun ProductsScreen(
                 "There was a problem in retrieving the products!",
                 Toast.LENGTH_LONG
             ).show()
+        } else {
+            selectedField.value?.let { it1 -> viewModel.sortProducts(it1) }
         }
     }
 
@@ -81,7 +88,8 @@ fun ProductsScreen(
             TopAppBar(
                 title = { Text(warehouse.name) },
                 navigationIcon = {
-                    IconButton(onClick = { controller.popBackStack() }) {
+                    IconButton(onClick = { shouldGetListFromDatabase = true
+                        controller.popBackStack() }) {
                         Icon(Icons.Filled.ArrowBack,null)
                     }
                 }
@@ -94,11 +102,7 @@ fun ProductsScreen(
                     selectedField = selectedField.value,
                     onSelectionChanged = {
                         selectedField.value = getSortField(it)
-                        selectedField.value?.let { it1 -> warehouse.id?.let { it2 ->
-                            viewModel.getAllProducts(it1,
-                                it2
-                            )
-                        } }
+                        selectedField.value?.let { it1 -> viewModel.sortProducts(it1) }
                     }
                 )
                 LazyColumn{

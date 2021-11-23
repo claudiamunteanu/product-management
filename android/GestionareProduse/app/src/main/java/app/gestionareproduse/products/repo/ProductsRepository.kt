@@ -17,12 +17,7 @@ class ProductsRepositoryImpl(
 ) : ProductsRepository{
 
     override fun getAllProducts(field: SortField, warehouseId: Long):Flow<List<Product>>{
-        return when (field){
-            SortField.EXP_DATE -> productDao.getAllProductsByExpDate(warehouseId)
-            SortField.NAME -> productDao.getAllProductsByName(warehouseId)
-            SortField.BRAND -> productDao.getAllProductsByBrand(warehouseId)
-            SortField.PRICE -> productDao.getAllProductsByPrice(warehouseId)
-        }
+        return productDao.getAllProducts(warehouseId)
     }
 
     // You must call this on a non-UI thread or your app will crash. So we're making this a

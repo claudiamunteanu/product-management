@@ -16,7 +16,9 @@ class ProductsViewModel @Inject constructor(
     private val useCase: ProductsUseCase
 ) : ViewModel(){
 
-    var listOfProducts : MutableLiveData<List<Product>> = MutableLiveData<List<Product>>()
+    private var _listOfProducts : MutableLiveData<List<Product>> = MutableLiveData<List<Product>>(listOf())
+
+    val listOfProducts : LiveData<List<Product>> = _listOfProducts
 
     val isRetrievedSuccessfully = MutableLiveData<Boolean>()
 
@@ -24,13 +26,25 @@ class ProductsViewModel @Inject constructor(
         viewModelScope.launch {
             try{
                 useCase.getAllProducts(field, warehouseId).collect{
-                    listOfProducts.postValue(it)
+                    _listOfProducts.postValue(it)
+                    isRetrievedSuccessfully.postValue(true)
                 }
-                isRetrievedSuccessfully.postValue(true)
             } catch (exception : Exception){
                 isRetrievedSuccessfully.postValue(false)
                 Log.d("error", "", exception)
             }
         }
+    }
+
+    fun sortProducts(field: SortField){
+        var list = _listOfProducts.value
+        _listOfProducts.value = list?.sortedWith(
+            when (field) {
+                SortField.EXP_DATE -> compareBy { it.expirationDate }
+                SortField.NAME -> compareBy { it.name }
+                SortField.BRAND -> compareBy { it.brand }
+                SortField.PRICE -> compareBy { it.price }
+            }
+        )
     }
 }
