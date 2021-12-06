@@ -1,0 +1,101 @@
+	productDao.insert(Product(
+            name = "Iaurt cu cereale, nuci si ovaz",
+            brand = "Activia",
+            price = 1.80,
+            isPerUnit = true,
+            expirationDate = Utils.stringToDate("16.10.2021"),
+            isRefrigerated = true,
+            image = "https://www.auchan.ro/public/images/h33/hd1/h00/iaurt-activia-cu-cereale-nuci-si-ovaz-125g-8950867689502.jpg",
+            warehouseId = 1L
+        ))
+        productDao.insert(Product(
+            name = "Biscuiti sarati, originali",
+            brand = "Tuc",
+            price = 2.55,
+            isPerUnit = true,
+            expirationDate = Utils.stringToDate("27.11.2021"),
+            isRefrigerated = false,
+            image = "https://www.auchan.ro/public/images/h01/hb2/h00/biscuiti-tuc-originali-100-g-8861037395998.jpg",
+            warehouseId = 1L
+        ))
+        productDao.insert(Product(
+            name = "Ceapa galbena",
+            brand = "Ceapa",
+            price = 1.39,
+            isPerUnit = false,
+            expirationDate = Utils.stringToDate("29.11.2021"),
+            isRefrigerated = false,
+            image = "https://www.cora.ro/images/products/1793205/gallery/1793205_hd_1.jpg",
+            warehouseId = 1L
+        ))
+        productDao.insert(Product(
+            name = "Inghetata Topgun Over cu vanilie,260ml",
+            brand = "Nestle",
+            price = 5.15,
+            isPerUnit = true,
+            expirationDate = Utils.stringToDate("31.12.2021"),
+            isRefrigerated = true,
+            image = "https://www.auchan.ro/public/images/hb0/h48/h00/inghetata-topgun-over-cu-vanilie-260ml-9434379255838.jpg",
+            warehouseId = 1L
+        ))
+        productDao.insert(Product(
+            name = "Fasole Bitar, bob mic 1 Kg",
+            brand = "Bitar",
+            price = 6.95,
+            isPerUnit = true,
+            expirationDate = Utils.stringToDate("31.12.2021"),
+            isRefrigerated = false,
+            image = "https://www.auchan.ro/public/images/h45/hb2/h00/fasola-bitar-bob-mic-1-kg-8847143239710.jpg",
+            warehouseId = 2L
+        ))
+        productDao.insert(Product(
+            name = "Telemea Huedin din lapte de vaca 350 g",
+            brand = "Napolact",
+            price = 13.70,
+            isPerUnit = true,
+            expirationDate = Utils.stringToDate("16.12.2021"),
+            isRefrigerated = true,
+            image = "https://www.auchan.ro/public/images/h49/h1e/h00/telemea-de-vaca-napolact-350-g-8972713263134.jpg",
+            warehouseId = 2L
+        ))
+        productDao.insert(Product(
+            name = "Banane",
+            brand = "Banane",
+            price = 5.49,
+            isPerUnit = false,
+            expirationDate = Utils.stringToDate("5.12.2021"),
+            isRefrigerated = false,
+            image = "https://www.auchan.ro/public/images/h74/h8c/h00/banane-pretkg-8885219950622.jpg",
+            warehouseId = 2L
+        ))
+        productDao.insert(Product(
+            name = "Cereale Fitness cu ciocolata, 425g",
+            brand = "Nestle",
+            price = 12.70,
+            isPerUnit = true,
+            expirationDate = Utils.stringToDate("15.05.2022"),
+            isRefrigerated = false,
+            image = "https://www.auchan.ro/public/images/h6c/h88/h00/cereale-fitness-cu-ciocolata-425g-9419378982942.jpg",
+            warehouseId = 3L
+        ))
+        productDao.insert(Product(
+            name = "Cafea cu lapte Nescafe Dolce Gusto 16 capsule",
+            brand = "Nescafe",
+            price = 19.99,
+            isPerUnit = true,
+            expirationDate = Utils.stringToDate("25.09.2022"),
+            isRefrigerated = false,
+            image = "https://www.auchan.ro/public/images/hb9/h5b/h00/cafea-cu-lapte-nescafe-dolce-gusto-16-capsule-8946496339998.jpg",
+            warehouseId = 3L
+        ))
+
+
+	warehouseDao.insert(Warehouse(
+            name = "Cluj-Napoca Warehouse"
+        ))
+	warehouseDao.insert(Warehouse(
+            name = "Brasov Warehouse"
+        ))
+	warehouseDao.insert(Warehouse(
+            name = "Suceava Warehouse"
+        ))

@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.Flow
 interface ProductDao {
     @Query("SELECT * FROM products_table WHERE warehouseId=:warehouseId")
     fun getAllProducts(warehouseId: Long): Flow<List<Product>>
+    // a flow is a type that can emit multiple values sequentially, as opposed to suspend functions that return only a single value.
+    // You don't need an Activity to observe (collect) data
 
     @Insert
     fun insert(product: Product)
