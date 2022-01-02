@@ -1,10 +1,15 @@
 package app.gestionareproduse.products.viewmodel
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.*
 import app.gestionareproduse.products.domain.Product
 import app.gestionareproduse.products.domain.SortField
 import app.gestionareproduse.products.usecase.ProductsUseCase
+import app.gestionareproduse.utils.networkConnectivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.lang.Exception
@@ -22,10 +27,10 @@ class ProductsViewModel @Inject constructor(
 
     val isRetrievedSuccessfully = MutableLiveData<Boolean>()
 
-    fun getAllProducts(field: SortField, warehouseId: Long){
+    fun getAllLocalProducts(field: SortField, warehouseId: Long){
         viewModelScope.launch {
             try{
-                useCase.getAllProducts(field, warehouseId).collect{
+                useCase.getAllLocalProducts(warehouseId).collect{
                     _listOfProducts.postValue(it)
                     isRetrievedSuccessfully.postValue(true)
                 }
@@ -46,5 +51,23 @@ class ProductsViewModel @Inject constructor(
                 SortField.PRICE -> compareBy { it.price }
             }
         )
+    }
+
+    val syncProducts: () -> Unit = {
+        viewModelScope.launch {
+            useCase.syncProducts()
+        }
+    }
+
+    fun loadProducts(context: Context, sortField: SortField, warehouseId: Long, showError: (String) -> Unit, progressIndicatorVisibility : MutableState<Boolean>){
+        viewModelScope.launch {
+            val connectivity = networkConnectivity(context, syncProducts)
+            if (!connectivity) {
+                showError("No internet connection!")
+            } else {
+                useCase.getAllProducts(warehouseId, showError, progressIndicatorVisibility)
+            }
+            sortProducts(sortField)
+        }
     }
 }

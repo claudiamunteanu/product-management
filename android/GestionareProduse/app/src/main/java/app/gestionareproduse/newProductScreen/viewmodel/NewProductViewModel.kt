@@ -1,15 +1,20 @@
 package app.gestionareproduse.newProductScreen.viewmodel
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.gestionareproduse.products.domain.Product
 import app.gestionareproduse.products.usecase.ProductsUseCase
+import app.gestionareproduse.utils.networkConnectivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import java.lang.NumberFormatException
 import javax.inject.Inject
 
@@ -22,18 +27,25 @@ class NewProductViewModel @Inject constructor(
     val priceError = MutableLiveData<String>()
     val expDateError = MutableLiveData<String>()
 
-    val isSavedSuccessfully = MutableLiveData<Boolean>()
-
-    fun saveProduct(product: Product) = viewModelScope.launch(Dispatchers.IO) {
-        try{
-            useCase.saveProduct(product)
-            isSavedSuccessfully.postValue(true)
-        } catch (exception : Exception){
-            isSavedSuccessfully.postValue(false)
-            Log.d("error", "", exception)
+    val syncProducts: () -> Unit = {
+        viewModelScope.launch {
+            useCase.syncProducts()
         }
     }
 
+    fun saveProduct(context: Context, product: Product, showMessage: (Boolean, String) -> Unit, progressIndicatorVisibility : MutableState<Boolean>) {
+        viewModelScope.launch(Dispatchers.IO){
+            val connectivity = networkConnectivity(context, syncProducts)
+            if (!connectivity) {
+                showMessage(true, "No internet connection!")
+                product.isUploaded = false
+                useCase.saveProductLocally(product)
+            } else {
+                product.isUploaded = true
+                useCase.saveProduct(product, showMessage, progressIndicatorVisibility)
+            }
+        }
+    }
 
     fun validateName(name: String): Boolean {
         if (name.isEmpty()) {

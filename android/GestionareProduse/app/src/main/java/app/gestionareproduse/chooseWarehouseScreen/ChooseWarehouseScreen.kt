@@ -24,24 +24,46 @@ import androidx.compose.ui.unit.toSize
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.gestionareproduse.chooseWarehouseScreen.domain.Warehouse
 import app.gestionareproduse.chooseWarehouseScreen.viewmodel.ChooseWarehouseViewModel
+import kotlinx.coroutines.launch
+
+internal var shouldGetListFromDatabase = true
 
 @Composable
 fun ChooseWarehouseScreen(
     viewModel: ChooseWarehouseViewModel = hiltViewModel(),
     onSubmit: (Warehouse) -> Unit
-){
+) {
     val listOfWarehouses by viewModel.listOfWarehouses.observeAsState(listOf())
 
     val context = LocalContext.current
 
-    val selectedWarehouse : MutableState<Warehouse?> = remember{ mutableStateOf(null)}
+    val snackbarHostState = remember { mutableStateOf(SnackbarHostState()) }
+    val snackbarCoroutineScope = rememberCoroutineScope()
 
-    val updateWarehouse = {warehouse: Warehouse ->
+    val showError: (String) -> Unit = {
+        snackbarCoroutineScope.launch {
+            snackbarHostState.value.showSnackbar(
+                message = it,
+                duration = if (listOfWarehouses.size == 0) SnackbarDuration.Indefinite else SnackbarDuration.Short
+            )
+        }
+    }
+
+    val progressIndicatorVisibility = remember { mutableStateOf(false) }
+
+    if (shouldGetListFromDatabase) {
+        viewModel.loadWarehouses(context, showError, progressIndicatorVisibility)
+        shouldGetListFromDatabase = false
+    }
+
+    val selectedWarehouse: MutableState<Warehouse?> = remember { mutableStateOf(null) }
+
+    val updateWarehouse = { warehouse: Warehouse ->
         selectedWarehouse.value = warehouse
     }
 
-    viewModel.isRetrievedSuccessfully.observe(LocalLifecycleOwner.current){
-        if(it == false){
+    viewModel.isRetrievedSuccessfully.observe(LocalLifecycleOwner.current) {
+        if (it == false) {
             Toast.makeText(
                 context,
                 "There was a problem in retrieving the warehouses!",
@@ -57,29 +79,65 @@ fun ChooseWarehouseScreen(
             )
         },
         content = {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(50.dp, 0.dp),
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                if(listOfWarehouses.size>0){
-                    selectedWarehouse.value = listOfWarehouses[0]
-                    DropDown(
-                        optionsList = listOfWarehouses,
-                        updateWarehouse = updateWarehouse
-                    )
-                    Button(
-                        content = {
-                            Text(text = "Submit")
-                        },
-                        onClick = {
-                            onSubmit(selectedWarehouse.value!!)
-                        }
+                if (progressIndicatorVisibility.value) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(100.dp)
                     )
                 }
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .padding(50.dp, 0.dp),
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (listOfWarehouses.size > 0) {
+                        selectedWarehouse.value = listOfWarehouses[0]
+                        DropDown(
+                            optionsList = listOfWarehouses,
+                            updateWarehouse = updateWarehouse
+                        )
+                        Button(
+                            content = {
+                                Text(text = "Submit")
+                            },
+                            onClick = {
+                                shouldGetListFromDatabase = true
+                                onSubmit(selectedWarehouse.value!!)
+                            }
+                        )
+                    }
+                }
             }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState.value,
+                snackbar = {
+                    Snackbar(
+                        action = {
+                            if (listOfWarehouses.size == 0) {
+                                Button(onClick = {
+                                    snackbarHostState.value.currentSnackbarData?.dismiss()
+                                    viewModel.loadWarehouses(
+                                        context,
+                                        showError,
+                                        progressIndicatorVisibility
+                                    )
+                                }) {
+                                    Text("RETRY")
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(8.dp),
+                    ) { Text(text = it.message) }
+                }
+            )
         }
     )
 }
@@ -88,13 +146,13 @@ fun ChooseWarehouseScreen(
 fun DropDown(
     optionsList: List<Warehouse>,
     updateWarehouse: (warehouse: Warehouse) -> Unit
-){
+) {
 
     var expanded by remember { mutableStateOf(false) }
 
     var selectedWarehouse: Warehouse by remember { mutableStateOf(optionsList[0]) }
 
-    var textfieldSize by remember { mutableStateOf(Size.Zero)}
+    var textfieldSize by remember { mutableStateOf(Size.Zero) }
 
     val icon = if (expanded)
         Icons.Filled.ArrowDropUp //it requires androidx.compose.material:material-icons-extended
@@ -102,7 +160,7 @@ fun DropDown(
         Icons.Filled.ArrowDropDown
 
 
-    Column{
+    Column {
         OutlinedTextField(
             value = selectedWarehouse.name ?: "",
             onValueChange = {},
@@ -113,9 +171,9 @@ fun DropDown(
                     textfieldSize = coordinates.size.toSize()
                 }
                 .clickable { expanded = !expanded },
-            label = {Text("Choose warehouse")},
+            label = { Text("Choose warehouse") },
             trailingIcon = {
-                Icon(icon,null)
+                Icon(icon, null)
             },
             enabled = false,
             colors = TextFieldDefaults.textFieldColors(
@@ -129,7 +187,7 @@ fun DropDown(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .width(with(LocalDensity.current){textfieldSize.width.toDp()})
+                .width(with(LocalDensity.current) { textfieldSize.width.toDp() })
         ) {
             optionsList.forEach { warehouse ->
                 DropdownMenuItem(onClick = {

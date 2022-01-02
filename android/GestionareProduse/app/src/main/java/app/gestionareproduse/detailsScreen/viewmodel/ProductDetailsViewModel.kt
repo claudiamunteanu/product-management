@@ -1,11 +1,16 @@
 package app.gestionareproduse.detailsScreen.viewmodel
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.gestionareproduse.products.domain.Product
 import app.gestionareproduse.products.usecase.ProductsUseCase
+import app.gestionareproduse.utils.networkConnectivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,28 +26,32 @@ class ProductsDetailsViewModel @Inject constructor(
     val priceHasError = MutableLiveData<String>()
     val expDateHasError = MutableLiveData<String>()
 
-    val isUpdatedSuccessfully = MutableLiveData<Boolean>()
-    val isDeletedSuccessfully = MutableLiveData<Boolean>()
-
-    fun updateProduct(product: Product) = viewModelScope.launch(Dispatchers.IO) {
-        try{
-            useCase.updateProduct(product)
-            isUpdatedSuccessfully.postValue(true)
-        } catch (exception : Exception){
-            isUpdatedSuccessfully.postValue(false)
-            Log.d("error", "", exception)
+    val syncProducts: () -> Unit = {
+        viewModelScope.launch {
+            useCase.syncProducts()
         }
     }
 
-    fun deleteProduct(productId: Long) = viewModelScope.launch(Dispatchers.IO) {
-        try{
-            useCase.deleteProduct(productId)
-            isDeletedSuccessfully.postValue(true)
-        } catch (exception : Exception){
-            isDeletedSuccessfully.postValue(false)
-            Log.d("error", "", exception)
+    fun updateProduct(context: Context, product: Product, showMessage: (Boolean, String) -> Unit, progressIndicatorVisibility : MutableState<Boolean>){
+        viewModelScope.launch(Dispatchers.IO){
+            val connectivity = networkConnectivity(context, syncProducts)
+            if (!connectivity) {
+                showMessage(false, "No internet connection! Cannot update product!")
+            }else{
+                useCase.updateProduct(product, showMessage, progressIndicatorVisibility)
+            }
         }
+    }
 
+    fun deleteProduct(context: Context, productId: Long, showMessage: (Boolean, String) -> Unit, progressIndicatorVisibility : MutableState<Boolean>) {
+        viewModelScope.launch(Dispatchers.IO){
+            val connectivity = networkConnectivity(context, syncProducts)
+            if (!connectivity) {
+                showMessage(false, "No internet connection! Cannot delete product!")
+            }else {
+                useCase.deleteProduct(productId, showMessage, progressIndicatorVisibility)
+            }
+        }
     }
 
     fun validateName(name: String): Boolean {

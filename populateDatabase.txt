@@ -1,4 +1,4 @@
-	productDao.insert(Product(
+productDao.insert(Product(
             name = "Iaurt cu cereale, nuci si ovaz",
             brand = "Activia",
             price = 1.80,

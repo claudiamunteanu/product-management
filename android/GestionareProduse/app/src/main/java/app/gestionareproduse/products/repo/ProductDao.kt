@@ -1,6 +1,5 @@
 package app.gestionareproduse.products.repo
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import app.gestionareproduse.products.domain.Product
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +20,9 @@ interface ProductDao {
     // a flow is a type that can emit multiple values sequentially, as opposed to suspend functions that return only a single value.
     // You don't need an Activity to observe (collect) data
 
+    @Query("SELECT * FROM products_table WHERE isUploaded=0")
+    fun getOfflineProducts(): Flow<List<Product>>
+
     @Insert
     fun insert(product: Product)
 
@@ -29,4 +31,13 @@ interface ProductDao {
 
     @Update
     fun update(product: Product)
+
+    @Query("DELETE FROM products_table")
+    fun deleteAllProducts()
+
+    @Query("DELETE FROM products_table WHERE isUploaded=0")
+    fun deleteOfflineProducts()
+
+    @Insert
+    fun saveProducts(products: List<Product>)
 }

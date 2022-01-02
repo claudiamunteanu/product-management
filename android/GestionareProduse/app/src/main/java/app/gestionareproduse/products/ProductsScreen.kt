@@ -1,6 +1,7 @@
 package app.gestionareproduse.products
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -38,6 +39,7 @@ import app.gestionareproduse.R
 import app.gestionareproduse.products.domain.SortField
 import app.gestionareproduse.products.domain.getAllSortFields
 import app.gestionareproduse.products.domain.getSortField
+import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -50,7 +52,7 @@ fun ProductsScreen(
     addProduct: () -> Unit,
     controller: NavController,
     encodedWarehouse: String
-){
+) {
     val listOfProducts by viewModel.listOfProducts.observeAsState(listOf())
 
     val context = LocalContext.current
@@ -59,13 +61,33 @@ fun ProductsScreen(
 
     val warehouseString = URLDecoder.decode(encodedWarehouse, StandardCharsets.UTF_8.toString())
     val warehouse = Utils.stringToWarehouse(warehouseString)
+
+    val progressIndicatorVisibility = remember{ mutableStateOf(false) }
+
+    val snackbarHostState = remember{mutableStateOf(SnackbarHostState())}
+    val snackbarCoroutineScope = rememberCoroutineScope()
+
+    val showError: (String) -> Unit = {
+        snackbarCoroutineScope.launch {
+            snackbarHostState.value.showSnackbar(
+                message = it,
+                duration = if (listOfProducts.size==0) SnackbarDuration.Indefinite else SnackbarDuration.Short
+            )
+        }
+    }
+
     if (shouldGetListFromDatabase) {
-        selectedField.value?.let { warehouse.id?.let { it1 -> viewModel.getAllProducts(it, it1) } }
+        selectedField.value?.let {
+            warehouse.id?.let { it1 ->
+                viewModel.getAllLocalProducts(it, it1)
+                viewModel.loadProducts(context, it, it1, showError, progressIndicatorVisibility)
+            }
+        }
         shouldGetListFromDatabase = false
     }
 
-    viewModel.isRetrievedSuccessfully.observe(LocalLifecycleOwner.current){
-        if(it == false){
+    viewModel.isRetrievedSuccessfully.observe(LocalLifecycleOwner.current) {
+        if (it == false) {
             Toast.makeText(
                 context,
                 "There was a problem in retrieving the products!",
@@ -76,44 +98,89 @@ fun ProductsScreen(
         }
     }
 
+    BackHandler {
+        shouldGetListFromDatabase = true
+        controller.popBackStack()
+    }
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = {addProduct()}) {
+                onClick = { addProduct() }) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = null)
-
             }
         },
         topBar = {
             TopAppBar(
                 title = { Text(warehouse.name) },
                 navigationIcon = {
-                    IconButton(onClick = { shouldGetListFromDatabase = true
-                        controller.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack,null)
+                    IconButton(onClick = {
+                        shouldGetListFromDatabase = true
+                        controller.popBackStack()
+                    }) {
+                        Icon(Icons.Filled.ArrowBack, null)
                     }
                 }
             )
         },
         content = {
-            Column{
-                ChipGroup(
-                    sortFields = getAllSortFields(),
-                    selectedField = selectedField.value,
-                    onSelectionChanged = {
-                        selectedField.value = getSortField(it)
-                        selectedField.value?.let { it1 -> viewModel.sortProducts(it1) }
-                    }
-                )
-                LazyColumn{
-                    items(listOfProducts){item->
-                        SingleProductItem(
-                            product = item,
-                            onProductClick = onProductClick
-                        )
+            Box {
+                if (progressIndicatorVisibility.value) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center).size(100.dp)
+                    )
+                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    ChipGroup(
+                        sortFields = getAllSortFields(),
+                        selectedField = selectedField.value,
+                        onSelectionChanged = {
+                            selectedField.value = getSortField(it)
+                            selectedField.value?.let { it1 -> viewModel.sortProducts(it1) }
+                        }
+                    )
+                    if(!progressIndicatorVisibility.value){
+                        LazyColumn {
+                            items(listOfProducts) { item ->
+                                SingleProductItem(
+                                    product = item,
+                                    onProductClick = onProductClick
+                                )
+                            }
+                        }
                     }
                 }
             }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState.value,
+                snackbar = {
+                    Snackbar(
+                        action = {
+                            if(listOfProducts.size == 0){
+                                Button(onClick = {
+                                    snackbarHostState.value.currentSnackbarData?.dismiss()
+                                    selectedField.value?.let { it1 ->
+                                        warehouse.id?.let { it2 ->
+                                            viewModel.loadProducts(
+                                                context,
+                                                it1, it2, showError, progressIndicatorVisibility
+                                            )
+                                        }
+                                    }
+                                }) {
+                                    Text("RETRY")
+                                }
+                            }
+                        },
+                        modifier = Modifier.padding(8.dp),
+                    ) { Text(text = it.message) }
+                }
+            )
         }
     )
 }
@@ -123,7 +190,7 @@ fun ProductsScreen(
 fun SingleProductItem(
     product: Product,
     onProductClick: (Product) -> Unit
-){
+) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -134,7 +201,7 @@ fun SingleProductItem(
             },
         elevation = 8.dp,
         backgroundColor = Utils.BackgroundColorByExpirationDate(product.expirationDate)
-    ){
+    ) {
         Row(
             modifier = Modifier.padding(8.dp, 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -174,12 +241,12 @@ fun SingleProductItem(
                 modifier = Modifier.weight(1F)
             ) {
                 Text(
-                    text = if (product.isPerUnit) product.price.toString()+" Lei" else product.price.toString()+" Lei\n/kg",
+                    text = if (product.isPerUnit) product.price.toString() + " Lei" else product.price.toString() + " Lei\n/kg",
                     fontSize = 20.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp)
                 )
-                if(product.isRefrigerated){
+                if (product.isRefrigerated) {
                     Icon(
                         modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
                         painter = painterResource(id = R.drawable.ic_baseline_ac_unit_24),
@@ -198,13 +265,13 @@ fun Chip(
     name: String = "Chip",
     isSelected: Boolean = false,
     onSelectionChanged: (String) -> Unit = {}
-){
+) {
     Surface(
         modifier = Modifier.padding(4.dp),
         shape = RoundedCornerShape(16.dp),
         color = if (isSelected) Color(0xFFD3D3D3) else Color(0x1F232F34),
 
-    ){
+        ) {
         Row(
             modifier = Modifier.toggleable(
                 value = isSelected,
@@ -212,8 +279,8 @@ fun Chip(
                     onSelectionChanged(name)
                 }
             )
-        ){
-            if(isSelected){
+        ) {
+            if (isSelected) {
                 Icon(
                     imageVector = Icons.Filled.Done,
                     contentDescription = null,
@@ -237,13 +304,13 @@ fun Chip(
 @Preview(showBackground = true)
 @Composable
 fun ChipGroup(
-    sortFields : List<SortField> = getAllSortFields(),
+    sortFields: List<SortField> = getAllSortFields(),
     selectedField: SortField? = null,
     onSelectionChanged: (String) -> Unit = {}
-){
-    Column(modifier = Modifier.padding(8.dp,8.dp,0.dp, 0.dp)) {
-        LazyRow{
-            items(sortFields){
+) {
+    Column(modifier = Modifier.padding(8.dp, 8.dp, 0.dp, 0.dp)) {
+        LazyRow {
+            items(sortFields) {
                 Chip(
                     name = it.value,
                     isSelected = selectedField == it,

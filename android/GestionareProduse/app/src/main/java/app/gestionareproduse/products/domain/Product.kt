@@ -16,7 +16,7 @@ import java.util.*
                             onUpdate = ForeignKey.CASCADE)))
 @TypeConverters(DateConverter::class)
 data class Product(
-    @PrimaryKey(autoGenerate = true) var id: Long? = null,
+    @PrimaryKey(autoGenerate = false) var id: Long? = null,
     var name: String,
     var brand: String,
     var price: Double,
@@ -24,5 +24,6 @@ data class Product(
     var expirationDate: Date,
     var isRefrigerated: Boolean,
     var image: String,
-    var warehouseId: Long
+    var warehouseId: Long,
+    var isUploaded : Boolean? = null
 )

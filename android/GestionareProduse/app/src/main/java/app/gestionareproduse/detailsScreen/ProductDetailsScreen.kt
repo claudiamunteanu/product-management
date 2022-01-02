@@ -1,5 +1,7 @@
 package app.gestionareproduse.detailsScreen
 
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -13,6 +15,7 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -29,6 +32,7 @@ import app.gestionareproduse.detailsScreen.viewmodel.ProductsDetailsViewModel
 import app.gestionareproduse.utils.DatePickerview
 import app.gestionareproduse.utils.Utils
 import coil.compose.rememberImagePainter
+import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -86,37 +90,48 @@ fun ProductDetailsScreen(
     val focusManager = LocalFocusManager.current
 
     val context = LocalContext.current
-    viewModel.isUpdatedSuccessfully.observe(LocalLifecycleOwner.current){
-        if(it){
-            Toast.makeText(
-                context,
-                "Product updated successfully!",
-                Toast.LENGTH_LONG
-            ).show()
+
+    val progressIndicatorVisibility = remember{ mutableStateOf(false) }
+
+    val snackbarHostState = remember{mutableStateOf(SnackbarHostState())}
+    val snackbarCoroutineScope = rememberCoroutineScope()
+
+    val showMessage: (Boolean, String) -> Unit = { isSuccessful: Boolean, message: String ->
+        if(isSuccessful){
+            Handler(Looper.getMainLooper()).post{
+                Toast.makeText(
+                    context,
+                    message,
+                    Toast.LENGTH_LONG
+                ).show()
+                controller.popBackStack()
+            }
         } else {
-            Toast.makeText(
-                context,
-                "There was a problem in updating the product!",
-                Toast.LENGTH_LONG
-            ).show()
+            snackbarCoroutineScope.launch {
+                snackbarHostState.value.showSnackbar(
+                    message = message,
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
-        controller.popBackStack()
     }
-    viewModel.isDeletedSuccessfully.observe(LocalLifecycleOwner.current){
-        if(it){
-            Toast.makeText(
-                context,
-                "Product deleted successfully!",
-                Toast.LENGTH_LONG
-            ).show()
-        } else {
-            Toast.makeText(
-                context,
-                "There was a problem in deleting the product!",
-                Toast.LENGTH_LONG
-            ).show()
+
+    fun tryUpdateProduct(){
+        isErrorName.value = viewModel.validateName(name.value)
+        isErrorBrand.value = viewModel.validateBrand(brand.value)
+        isErrorPrice.value = viewModel.validatePrice(price.value)
+        isErrorExpirationDate.value = viewModel.validateExpirationDate(expirationDate.value)
+        isError()
+        if(isEnabled.value) {
+            selectedProduct.isPerUnit = selectedType.value
+            selectedProduct.isRefrigerated = isRefrigerated.value
+            selectedProduct.name = name.value
+            selectedProduct.brand = brand.value
+            selectedProduct.price = price.value.toDouble()
+            selectedProduct.expirationDate = Utils.stringToDate(expirationDate.value)
+            selectedProduct.image = url.value
+            viewModel.updateProduct(context, selectedProduct, showMessage, progressIndicatorVisibility)
         }
-        controller.popBackStack()
     }
 
     Scaffold(
@@ -136,244 +151,241 @@ fun ProductDetailsScreen(
             )
         },
         content = {
-            LazyColumn(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(50.dp, 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ){
-                item {
-                    Column(){
-                        OutlinedTextField(
-                            value = name.value,
-                            onValueChange = {
-                                name.value = it
-                                changed.value = true
-                                isErrorName.value = viewModel.validateName(name.value)
-                                isError()
-                            },
-                            label = {
-                                Text(text = "Name")
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Text,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(onNext = {
-                                isErrorName.value = viewModel.validateName(name.value)
-                                focusManager.moveFocus(FocusDirection.Down)
-                            }),
-                            trailingIcon = {
-                                if (isErrorName.value) {
-                                    Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
-                                }
-                            }
-                        )
-                        assistiveOrErrorText(isError = isErrorName.value, errorString = nameErrorString)
-                    }
-                }
-                item{
-                    Column(){
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            value = brand.value,
-                            onValueChange = {
-                                brand.value = it
-                                changed.value = true
-                                isErrorBrand.value = viewModel.validateBrand(brand.value)
-                                isError()
-                            },
-                            label = {
-                                Text(text = "Brand")
-                            },
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Text,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(onNext = {
-                                isErrorBrand.value = viewModel.validateBrand(brand.value)
-                                focusManager.moveFocus(FocusDirection.Down)
-                            }),
-                            trailingIcon = {
-                                if (isErrorBrand.value) {
-                                    Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
-                                }
-                            }
-                        )
-                        assistiveOrErrorText(isError = isErrorBrand.value, errorString = brandErrorString)
-                    }
-                }
-                item{
-                    Column() {
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            value = price.value,
-                            onValueChange = {
-                                price.value = it
-                                changed.value = true
-                                isErrorPrice.value = viewModel.validatePrice(price.value)
-                                isError()
-                            },
-                            label = {
-                                Text(text = "Price")
-                            },
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(onNext = {
-                                isErrorPrice.value = viewModel.validatePrice(price.value)
-                                focusManager.moveFocus(FocusDirection.Down)
-                            }),
-                            trailingIcon = {
-                                if (isErrorPrice.value) {
-                                    Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
-                                }
-                            }
-                        )
-                        assistiveOrErrorText(isError = isErrorPrice.value, errorString = priceErrorString)
-                    }
-                }
-                item{
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ){
-                        RadioButton(selected = selectedType.value==true, onClick = {
-                            selectedType.value = true
-                            changed.value = true
-                        })
-                        Spacer(modifier = Modifier.size(16.dp))
-                        Text("per unit")
-                        Spacer(modifier = Modifier.size(16.dp))
-                        RadioButton(selected = selectedType.value==false, onClick = {
-                            selectedType.value = false
-                            changed.value = true
-                        })
-                        Spacer(modifier = Modifier.size(16.dp))
-                        Text("per Kg")
-                    }
-                }
-                item{
-                    Column() {
-                        DatePickerview(expirationDate.value, updatedDate, changed, isErrorExpirationDate,
-                            { isError() })
-                        assistiveOrErrorText(
-                            isError = isErrorExpirationDate.value,
-                            errorString = expirationDateErrorString
-                        )
-                    }
-                }
-                item{
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ){
-                        Checkbox(
-                            checked = isRefrigerated.value == true,
-                            onCheckedChange = {
-                                isRefrigerated.value = it
-                                changed.value = true
-                            })
-                        Spacer(modifier = Modifier.size(16.dp))
-                        Text("is refrigerable")
-                    }
-                }
-                item{
-                    Column() {
-                        OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
-                            value = url.value,
-                            onValueChange = {
-                                url.value = it
-                                changed.value = true
-                            },
-                            label = {
-                                Text(text = "Image URL")
-                            },
-                            maxLines = 1,
-                            keyboardOptions = KeyboardOptions.Default.copy(
-                                keyboardType = KeyboardType.Text,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(onDone = {
-                                focusManager.clearFocus()
-                            }),
-                        )
-                    }
-                }
-                item{
-                    Image(
-                        modifier = Modifier
-                            .size(200.dp)
-                            .padding(8.dp),
-                        painter = rememberImagePainter(
-                            if (url.value.isNotEmpty()) {
-                                url.value
-                            } else {
-                                R.drawable.placeholder_image
-                            }
-                        ),
-                        contentDescription = null
+            Box{
+                if(progressIndicatorVisibility.value){
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center).size(100.dp)
                     )
                 }
-                item{
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ){
-                        Button(
-                            content = {
-                                Text(text = "Cancel")
-                            },
-                            onClick = {
-                                if (!changed.value || !isEnabled.value)
-                                    controller.popBackStack()
-                                else
-                                    openUpdateDialog.value = true
-                            }
-                        )
-
-                        val context = LocalContext.current
-                        Button(
-                            enabled = isEnabled.value,
-                            content = {
-                                Text(text = "Update")
-                            },
-                            onClick = {
-                                isErrorName.value = viewModel.validateName(name.value)
-                                isErrorBrand.value = viewModel.validateBrand(brand.value)
-                                isErrorPrice.value = viewModel.validatePrice(price.value)
-                                isErrorExpirationDate.value = viewModel.validateExpirationDate(expirationDate.value)
-                                isError()
-                                if(isEnabled.value){
-                                    selectedProduct.isPerUnit = selectedType.value
-                                    selectedProduct.isRefrigerated = isRefrigerated.value
-                                    selectedProduct.name = name.value
-                                    selectedProduct.brand= brand.value
-                                    selectedProduct.price = price.value.toDouble()
-                                    selectedProduct.expirationDate = Utils.stringToDate(expirationDate.value)
-                                    selectedProduct.image = url.value
-                                    viewModel.updateProduct(selectedProduct)
-                                    Toast.makeText(
-                                        context,
-                                        "Product updated successfully!",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    controller.popBackStack()
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(50.dp, 20.dp).align(Alignment.Center),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ){
+                    item {
+                        Column(){
+                            OutlinedTextField(
+                                value = name.value,
+                                onValueChange = {
+                                    name.value = it
+                                    changed.value = true
+                                    isErrorName.value = viewModel.validateName(name.value)
+                                    isError()
+                                },
+                                label = {
+                                    Text(text = "Name")
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Next
+                                ),
+                                keyboardActions = KeyboardActions(onNext = {
+                                    isErrorName.value = viewModel.validateName(name.value)
+                                    focusManager.moveFocus(FocusDirection.Down)
+                                }),
+                                trailingIcon = {
+                                    if (isErrorName.value) {
+                                        Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
+                                    }
                                 }
-                            }
-                        )
-                        Button(
-                            content = {
-                                Text(text = "Delete")
-                            },
-                            onClick = {
-                                openDeleteDialog.value = true
-                            }
+                            )
+                            assistiveOrErrorText(isError = isErrorName.value, errorString = nameErrorString)
+                        }
+                    }
+                    item{
+                        Column(){
+                            OutlinedTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = brand.value,
+                                onValueChange = {
+                                    brand.value = it
+                                    changed.value = true
+                                    isErrorBrand.value = viewModel.validateBrand(brand.value)
+                                    isError()
+                                },
+                                label = {
+                                    Text(text = "Brand")
+                                },
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Next
+                                ),
+                                keyboardActions = KeyboardActions(onNext = {
+                                    isErrorBrand.value = viewModel.validateBrand(brand.value)
+                                    focusManager.moveFocus(FocusDirection.Down)
+                                }),
+                                trailingIcon = {
+                                    if (isErrorBrand.value) {
+                                        Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
+                                    }
+                                }
+                            )
+                            assistiveOrErrorText(isError = isErrorBrand.value, errorString = brandErrorString)
+                        }
+                    }
+                    item{
+                        Column() {
+                            OutlinedTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = price.value,
+                                onValueChange = {
+                                    price.value = it
+                                    changed.value = true
+                                    isErrorPrice.value = viewModel.validatePrice(price.value)
+                                    isError()
+                                },
+                                label = {
+                                    Text(text = "Price")
+                                },
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Next
+                                ),
+                                keyboardActions = KeyboardActions(onNext = {
+                                    isErrorPrice.value = viewModel.validatePrice(price.value)
+                                    focusManager.moveFocus(FocusDirection.Down)
+                                }),
+                                trailingIcon = {
+                                    if (isErrorPrice.value) {
+                                        Icon(Icons.Filled.Error, "error", tint = MaterialTheme.colors.error)
+                                    }
+                                }
+                            )
+                            assistiveOrErrorText(isError = isErrorPrice.value, errorString = priceErrorString)
+                        }
+                    }
+                    item{
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ){
+                            RadioButton(selected = selectedType.value==true, onClick = {
+                                selectedType.value = true
+                                changed.value = true
+                            })
+                            Spacer(modifier = Modifier.size(16.dp))
+                            Text("per unit")
+                            Spacer(modifier = Modifier.size(16.dp))
+                            RadioButton(selected = selectedType.value==false, onClick = {
+                                selectedType.value = false
+                                changed.value = true
+                            })
+                            Spacer(modifier = Modifier.size(16.dp))
+                            Text("per Kg")
+                        }
+                    }
+                    item{
+                        Column() {
+                            DatePickerview(expirationDate.value, updatedDate, changed, isErrorExpirationDate,
+                                { isError() })
+                            assistiveOrErrorText(
+                                isError = isErrorExpirationDate.value,
+                                errorString = expirationDateErrorString
+                            )
+                        }
+                    }
+                    item{
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                        ){
+                            Checkbox(
+                                checked = isRefrigerated.value == true,
+                                onCheckedChange = {
+                                    isRefrigerated.value = it
+                                    changed.value = true
+                                })
+                            Spacer(modifier = Modifier.size(16.dp))
+                            Text("is refrigerable")
+                        }
+                    }
+                    item{
+                        Column() {
+                            OutlinedTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = url.value,
+                                onValueChange = {
+                                    url.value = it
+                                    changed.value = true
+                                },
+                                label = {
+                                    Text(text = "Image URL")
+                                },
+                                maxLines = 1,
+                                keyboardOptions = KeyboardOptions.Default.copy(
+                                    keyboardType = KeyboardType.Text,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(onDone = {
+                                    focusManager.clearFocus()
+                                }),
+                            )
+                        }
+                    }
+                    item{
+                        Image(
+                            modifier = Modifier
+                                .size(200.dp)
+                                .padding(8.dp),
+                            painter = rememberImagePainter(
+                                if (url.value.isNotEmpty()) {
+                                    url.value
+                                } else {
+                                    R.drawable.placeholder_image
+                                }
+                            ),
+                            contentDescription = null
                         )
                     }
-                }
+                    item{
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ){
+                            Button(
+                                content = {
+                                    Text(text = "Cancel")
+                                },
+                                onClick = {
+                                    if (!changed.value || !isEnabled.value)
+                                        controller.popBackStack()
+                                    else
+                                        openUpdateDialog.value = true
+                                }
+                            )
 
+                            val context = LocalContext.current
+                            Button(
+                                enabled = isEnabled.value,
+                                content = {
+                                    Text(text = "Update")
+                                },
+                                onClick = {
+                                    tryUpdateProduct()
+                                }
+                            )
+                            Button(
+                                content = {
+                                    Text(text = "Delete")
+                                },
+                                onClick = {
+                                    openDeleteDialog.value = true
+                                }
+                            )
+                        }
+                    }
+
+                }
             }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState.value,
+                snackbar = {
+                    Snackbar(
+                        modifier = Modifier.padding(8.dp),
+                    ) { Text(text = it.message) }
+                }
+            )
         }
     )
 
@@ -400,20 +412,7 @@ fun ProductDetailsScreen(
                 Button(
                     onClick = {
                         openUpdateDialog.value = false
-                        selectedProduct.isPerUnit = selectedType.value
-                        selectedProduct.isRefrigerated = isRefrigerated.value
-                        selectedProduct.name = name.value
-                        selectedProduct.brand= brand.value
-                        selectedProduct.price = price.value.toDouble()
-                        selectedProduct.expirationDate = Utils.stringToDate(expirationDate.value)
-                        selectedProduct.image = url.value
-                        viewModel.updateProduct(selectedProduct)
-                        Toast.makeText(
-                            context,
-                            "Product updated successfully!",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        controller.popBackStack()
+                        tryUpdateProduct()
                     }) {
                     Text("Yes")
                 }
@@ -442,13 +441,7 @@ fun ProductDetailsScreen(
                 Button(
                     onClick = {
                         openDeleteDialog.value = false
-                        selectedProduct.id?.let { viewModel.deleteProduct(it) }
-                        Toast.makeText(
-                            context,
-                            "Product deleted successfully!",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        controller.popBackStack()
+                        selectedProduct.id?.let { viewModel.deleteProduct(context, it, showMessage, progressIndicatorVisibility) }
                     }) {
                     Text("Yes")
                 }
@@ -456,4 +449,3 @@ fun ProductDetailsScreen(
         )
     }
 }
-
