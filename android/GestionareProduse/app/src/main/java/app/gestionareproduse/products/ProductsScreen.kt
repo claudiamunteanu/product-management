@@ -71,7 +71,7 @@ fun ProductsScreen(
         snackbarCoroutineScope.launch {
             snackbarHostState.value.showSnackbar(
                 message = it,
-                duration = if (listOfProducts.size==0) SnackbarDuration.Indefinite else SnackbarDuration.Short
+                duration = SnackbarDuration.Indefinite,
             )
         }
     }
@@ -174,6 +174,12 @@ fun ProductsScreen(
                                     }
                                 }) {
                                     Text("RETRY")
+                                }
+                            } else {
+                                Button(onClick = {
+                                    snackbarHostState.value.currentSnackbarData?.dismiss()
+                                }) {
+                                    Text("CLOSE")
                                 }
                             }
                         },

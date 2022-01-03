@@ -44,7 +44,7 @@ fun ChooseWarehouseScreen(
         snackbarCoroutineScope.launch {
             snackbarHostState.value.showSnackbar(
                 message = it,
-                duration = if (listOfWarehouses.size == 0) SnackbarDuration.Indefinite else SnackbarDuration.Short
+                duration = SnackbarDuration.Indefinite
             )
         }
     }
@@ -131,6 +131,12 @@ fun ChooseWarehouseScreen(
                                     )
                                 }) {
                                     Text("RETRY")
+                                }
+                            } else {
+                                Button(onClick = {
+                                    snackbarHostState.value.currentSnackbarData?.dismiss()
+                                }) {
+                                    Text("CLOSE")
                                 }
                             }
                         },
