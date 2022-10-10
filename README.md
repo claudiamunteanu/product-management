@@ -88,11 +88,11 @@
 ## About The Project
 
 <p align="center">
-  <img src="images/chooseWarehouse.png" alt="Choose Warehouse Screenshot" width="250">
+  <img src="images/chooseWarehouse.png" alt="Choose Warehouse Screenshot" width="25%">
   <img height="350" hspace="20"/>
-  <img src="images/productsList.png" alt="View Products List Screenshot" width="250" margin="50">
+  <img src="images/productsList.png" alt="View Products List Screenshot" width="25%">
   <img height="350" hspace="20"/>
-  <img src="images/editProduct.png" alt="Edit Product Screenshot" width="250">
+  <img src="images/editProduct.png" alt="Edit Product Screenshot" width="25%">
 </p>
 
 The user chooses a warehouse and for that warehouse's products, he can view a list of them, add new products and update or delete existing products. 
@@ -234,7 +234,8 @@ Project Link: [https://github.com/claudiamunteanu/product-management](https://gi
 [stars-url]: https://github.com/claudiamunteanu/product-management/stargazers
 [issues-shield]: https://img.shields.io/github/issues/claudiamunteanu/product-management.svg?style=for-the-badge
 [issues-url]: https://github.com/claudiamunteanu/product-management/issues
-[license-shield]: https://img.shields.io/github/license/claudiamunteanu/product-management.svg?style=for-the-badge
+<!--[license-shield]: https://img.shields.io/github/license/claudiamunteanu/product-management.svg?style=for-the-badge-->
+[license-shield]: https://img.shields.io/badge/License-MIT-yellow.svg
 [license-url]: https://github.com/claudiamunteanu/product-management/blob/master/LICENCE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/claudiamunteanu
