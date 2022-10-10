@@ -18,14 +18,14 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-<!--
-[![Contributors][contributors-shield]][contributors-url]
+
+<!--[![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
+[![Stargazers][stars-shield]][stars-url] 
+[![Issues][issues-shield]][issues-url] -->
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
--->
+
 
 <!--
  PROJECT LOGO
@@ -38,7 +38,7 @@
 <h3 align="center">Product Management</h3>
 
   <p align="center">
-    Simple CRUD mobile application for the management of a store's products, created for the "Mobile Application Programming" course at my university. The user chooses a warehouse and for that warehouse's products, he can view a list of them, add new products and update or delete existing products.
+    Simple CRUD mobile application for the management of a store's products, created for the "Mobile Application Programming" course at my university.
     <!--
     <br />
     <a href="https://github.com/claudiamunteanu/product-management"><strong>Explore the docs »</strong></a>
@@ -69,15 +69,18 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#setup-and-build">Setup and Build</a></li>
+        <li><a href="#running">Running</a></li>
       </ul>
     </li>
+    <!--
     <li><a href="#usage">Usage</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
+    -->
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
+    <!--<li><a href="#acknowledgments">Acknowledgments</a></li>-->
   </ol>
 </details>
 
@@ -88,87 +91,87 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `claudiamunteanu`, `product-management`, `twitter_handle`, `claudiamunteanu`, `email_client`, `email`, `Product Management`, `project_description`
+The user chooses a warehouse and for that warehouse's products, he can view a list of them, add new products and update or delete existing products. 
+
+The project contains two versions: one made with flutter, which contains an in-memory repository, and one made with Jetpack Compose, which requires a server.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
 ### Built With
+#### Jetpack Compose version
+* [![Android][Android.com]][Android-url]
+* [![Android Studio][AndroidStudio.com]][AndroidStudio-url]
+* [![Kotlin][Kotlin.org]][Kotlin-url]
 
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+#### Flutter version
+* [![Flutter][Flutter.dev]][Flutter-url]
+* [![Android Studio][AndroidStudio.com]][AndroidStudio-url]
+* [![Dart][Dart.dev]][Dart-url]
+
+#### Server
+* [![NodeJS][Node.js]][Node-url]
+* [![WebStorm][WebStorm.com]][WebStorm-url]
+* [![JavaScript][JavaScript.com]][JavaScript-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+#### Jetpack Compose version
 
-### Installation
+* [Android Studio][AndroidStudio-url] (I'm using Android Studio Artic Fox)
+* [Web Storm][WebStorm-url]
+* [Optional] An Android phone with a minimum API level of 24 (Android 7.0)
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+#### Flutter version
+* [Android Studio][AndroidStudio-url]
+* [Optional] An Android phone with a minimum API level of 16 (Android 4.1)
+
+### Setup and build
+
+* Clone the repo
    ```sh
    git clone https://github.com/claudiamunteanu/product-management.git
    ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+* If you wish, modify the `warehouses.json` snd `products.json` files inside the `server` project with the warehouses and products of your choice
+### Running
+
+To run the flutter version of the project on your Android phone or emulator:
+* Deploy and run the `gestionare_produse` project inside the `flutter` folder
+
+To run the Jetpack Compose version of the project on your Android phone or emulator:
+1. Deploy and run following command in the terminal of the `server` project:
+```
+ npm start
+```
+2. Deploy and run the `GestionareProduse` project inside the `android` folder
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
 <!-- USAGE EXAMPLES -->
-## Usage
+<!--## Usage
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
 _For more examples, please refer to the [Documentation](https://example.com)_
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
-
-See the [open issues](https://github.com/claudiamunteanu/product-management/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+-->
 
 
 
 <!-- CONTRIBUTING -->
+<!--
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -183,7 +186,7 @@ Don't forget to give the project a star! Thanks again!
 5. Open a Pull Request
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
+-->
 
 
 <!-- LICENSE -->
@@ -198,7 +201,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+Munteanu Claudia-Maria - Linkedin: [claudiamunteanu][linkedin-url]
 
 Project Link: [https://github.com/claudiamunteanu/product-management](https://github.com/claudiamunteanu/product-management)
 
@@ -207,7 +210,7 @@ Project Link: [https://github.com/claudiamunteanu/product-management](https://gi
 
 
 <!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
+<!--## Acknowledgments
 
 * []()
 * []()
@@ -215,7 +218,7 @@ Project Link: [https://github.com/claudiamunteanu/product-management](https://gi
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
+-->
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
@@ -247,4 +250,20 @@ Project Link: [https://github.com/claudiamunteanu/product-management](https://gi
 [Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
 [Bootstrap-url]: https://getbootstrap.com
 [JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
+[JQuery-url]: https://jquery.com
+[Android.com]: https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white
+[Android-url]: https://www.android.com/
+[Flutter.dev]: https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white
+[Flutter-url]: https://flutter.dev/
+[Node.js]: https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white
+[Node-url]: https://nodejs.org/en/
+[AndroidStudio.com]: https://img.shields.io/badge/Android%20Studio-3DDC84.svg?style=for-the-badge&logo=android-studio&logoColor=white
+[AndroidStudio-url]: https://developer.android.com/studio
+[WebStorm.com]: https://img.shields.io/badge/webstorm-143?style=for-the-badge&logo=webstorm&logoColor=white&color=black
+[WebStorm-url]: https://www.jetbrains.com/webstorm/
+[Dart.dev]: https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white
+[Dart-url]: https://dart.dev/
+[Kotlin.org]: https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white
+[Kotlin-url]: https://kotlinlang.org/
+[JavaScript.com]: https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E
+[JavaScript-url]: https://www.javascript.com/
