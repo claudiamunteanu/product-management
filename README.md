@@ -84,12 +84,19 @@
   </ol>
 </details>
 
-
+<p align="center">
+  <img src="images/chooseWarehouse.png" alt="Choose Warehouse Screenshot" width="250">
+  <img src="images/productsList.png" alt="View Products List Screenshot" width="250" margin="50">
+  <img src="images/editProduct.png" alt="Edit Product Screenshot" width="250">
+</p>
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+
+![Select Warehouse Screenshot][select-warehouse-screenshot]
+![View Products List][view-products-list-screenshot]
+![Edit Product][edit-product-screenshot]
 
 The user chooses a warehouse and for that warehouse's products, he can view a list of them, add new products and update or delete existing products. 
 
@@ -234,7 +241,6 @@ Project Link: [https://github.com/claudiamunteanu/product-management](https://gi
 [license-url]: https://github.com/claudiamunteanu/product-management/blob/master/LICENCE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/claudiamunteanu
-[product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
