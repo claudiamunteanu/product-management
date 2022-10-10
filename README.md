@@ -84,19 +84,16 @@
   </ol>
 </details>
 
-<p align="center">
-  <img src="images/chooseWarehouse.png" alt="Choose Warehouse Screenshot" width="250">
-  <img src="images/productsList.png" alt="View Products List Screenshot" width="250" margin="50">
-  <img src="images/editProduct.png" alt="Edit Product Screenshot" width="250">
-</p>
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-
-![Select Warehouse Screenshot][select-warehouse-screenshot]
-![View Products List][view-products-list-screenshot]
-![Edit Product][edit-product-screenshot]
+<p align="center">
+  <img src="images/chooseWarehouse.png" alt="Choose Warehouse Screenshot" width="250">
+  <img height="350" hspace="20"/>
+  <img src="images/productsList.png" alt="View Products List Screenshot" width="250" margin="50">
+  <img height="350" hspace="20"/>
+  <img src="images/editProduct.png" alt="Edit Product Screenshot" width="250">
+</p>
 
 The user chooses a warehouse and for that warehouse's products, he can view a list of them, add new products and update or delete existing products. 
 
