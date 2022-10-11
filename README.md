@@ -234,8 +234,8 @@ Project Link: [https://github.com/claudiamunteanu/product-management](https://gi
 [stars-url]: https://github.com/claudiamunteanu/product-management/stargazers
 [issues-shield]: https://img.shields.io/github/issues/claudiamunteanu/product-management.svg?style=for-the-badge
 [issues-url]: https://github.com/claudiamunteanu/product-management/issues
-<!--[license-shield]: https://img.shields.io/github/license/claudiamunteanu/product-management.svg?style=for-the-badge-->
-[license-shield]: https://img.shields.io/badge/License-MIT-yellow.svg
+[license-shield]: https://img.shields.io/github/license/claudiamunteanu/product-management.svg?style=for-the-badge
+<!--[license-shield]: https://img.shields.io/badge/License-MIT-yellow.svg-->
 [license-url]: https://github.com/claudiamunteanu/product-management/blob/master/LICENCE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/claudiamunteanu
