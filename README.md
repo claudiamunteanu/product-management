@@ -36,7 +36,7 @@
   </a>
 -->
 # Product Management
-Simple CRUD mobile application for the management of a store's products, created for the "Mobile Application Programming" course at my university.
+Simple CRUD mobile application for the management of a store's products, created for the "Mobile Application Programming" course at my university in my third year.
   <!--
   <p align="center">
     Simple CRUD mobile application for the management of a store's products, created for the "Mobile Application Programming" course at my university.
